@@ -1,0 +1,23 @@
+{
+  "name": "sbux-smart-device",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "@types/johnny-five": "0.0.29",
+    "@types/node": "^6.0.45",
+    "azure-iot-device": "^1.0.15",
+    "azure-iot-device-amqp": "^1.0.15",
+    "camerapi": "^0.1.0",
+    "johnny-five": "^0.10.3",
+    "raspi-io": "^6.1.0",
+    "cognitive-services":"^0.5.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Jeremy Foster <jeremy.foster@live.com> (http://codefoster.com)",
+  "license": "Apache-2.0"
+}
