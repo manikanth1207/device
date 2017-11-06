@@ -39,11 +39,24 @@ board.on('ready', () => {
     // cam.baseFolder('.');
     // cam.takePicture('picture.png', (file, error) => {})
     //fs.unlinkSync('picture.png'); //delete a picture
-    
+
+    //device twin
+    hubClient.getTwin((err, twin) => {
+        let state = { key: "value" };
+        twin.properties.reported.update(state, err => {
+            if (err) {
+                console.error('could not update twin');
+            } else {
+                console.log('twin state reported');
+                process.exit();
+            }
+        })
+    });
+
     //iot hub
-    hubClient.open(err => {});
+    hubClient.open(err => { });
     let message = new device.Message(
         JSON.stringify({ deviceId: 'device1', tags: ['foo', 'baz', 'bar'] })
     );
-    hubClient.sendEvent(message, (err,res) => {});
+    hubClient.sendEvent(message, (err, res) => { });
 });
