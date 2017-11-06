@@ -9,13 +9,6 @@ import * as deviceAmqp from 'azure-iot-device-amqp';
 let connectionString = 'HostName=cfhub.azure-devices.net;DeviceId=dxpi12;SharedAccessKey=+romy/Woi3j/wP4WZ3AVWKQUtf1CTQ7Ugp89JFdzTAI=';
 let hubClient = deviceAmqp.clientFromConnectionString(connectionString);
 let state = {
-    hoppers: {
-        "verona": { currentWeight: 75, alertWeight: 25 },
-        "pike place": { currentWeight: 50, alertWeight: 25 },
-        "milk": { currentWeight: 98, alertWeight: 25 },
-        "chocolate": { currentWeight: 15, alertWeight: 25 },
-        "water": { currentWeight: 100, alertWeight: 100 }
-    },
     recipes: {
         "recipe1": {
             ingredients: {
@@ -41,6 +34,9 @@ let board = new five.Board({ io: new raspi() }); //TODO
 board.on('ready', () => {
     hubClient.open(err => {
         hubClient.getTwin((twinErr, twin) => {
+
+            // state.hoppers.verona.currentWeight = 70;
+
             if (twinErr) console.log(`Error getting the device twin (${twinErr})`);
 
             // setup i/o
@@ -53,6 +49,7 @@ board.on('ready', () => {
             leftButton.on('press', () => {
                 lcd.print('left');
                 lcd.bgColor("red");
+                console.log(twin);
             })
             rightButton.on('press', () => {
                 lcd.print('right');
@@ -64,6 +61,11 @@ board.on('ready', () => {
                 if (err) console.error('could not update twin ' + err);
                 else console.log('twin state reported');
             })
+
+            twin.on('properties.desired', function (desiredChange) {
+                console.log("received change: " + JSON.stringify(desiredChange));
+                lcd.bgColor("blue");
+            });
 
             // //send iot hub message
             // let message = new device.Message(
@@ -78,7 +80,20 @@ board.on('ready', () => {
             // hubClient.on('message', msg => {
             //     hubClient.complete(msg, () => {});
             // });
-        
+
         })
     });
 });
+
+function initialize() {
+    // set state to the contents of desired properties
+
+    // hoppers: {
+    //     "verona": { currentWeight: 75, alertWeight: 25 },
+    //     "pike place": { currentWeight: 50, alertWeight: 25 },
+    //     "milk": { currentWeight: 98, alertWeight: 25 },
+    //     "chocolate": { currentWeight: 15, alertWeight: 25 },
+    //     "water": { currentWeight: 100, alertWeight: 100 }
+    // },
+
+}
