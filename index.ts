@@ -1,68 +1,84 @@
-import * as five from 'johnny-five';
-//import * as raspi from 'raspi-io';
-import { Led } from "./raspi-mock";
-import * as Camera from 'camerapi';
-import * as cognitiveServices from 'cognitive-services'
-import * as fs from 'fs';
+import * as five from 'johnny-five'; //TODO
+import * as raspi from 'raspi-io'; //TODO
+
+// import * as five from "./five-mock";
 import * as device from 'azure-iot-device';
 import * as deviceAmqp from 'azure-iot-device-amqp';
 
-// let cogClient = new oxford.Client(process.env.COGNITIVE_SERVICES_KEY);
-let visionClient = new cognitiveServices();
-let connectionString = process.env.DEVICE_CONN_STRING;
+// let connectionString = process.env.DEVICE_CONN_STRING;
+let connectionString = 'HostName=cfhub.azure-devices.net;DeviceId=dxpi12;SharedAccessKey=+romy/Woi3j/wP4WZ3AVWKQUtf1CTQ7Ugp89JFdzTAI=';
 let hubClient = deviceAmqp.clientFromConnectionString(connectionString);
-
-let state = {};
+let state = {
+    hoppers: {
+        "verona": { currentWeight: 75, alertWeight: 25 },
+        "pike place": { currentWeight: 50, alertWeight: 25 },
+        "milk": { currentWeight: 98, alertWeight: 25 },
+        "chocolate": { currentWeight: 15, alertWeight: 25 },
+        "water": { currentWeight: 100, alertWeight: 100 }
+    },
+    recipes: {
+        "recipe1": {
+            ingredients: {
+                "water": { amount: 17, temperature: 170 },
+                "chocolate": { amount: 30 },
+                "verona": { amount: 30 }
+            }
+        },
+        "recipe2": {
+            ingredients: {
+                "water": { amount: 17, temperature: 170 },
+                "chocolate": { amount: 30 },
+                "verona": { amount: 30 }
+            }
+        },
+    },
+    location: "5 NW Kitchen"
+}
 
 //establishing connection to gpio
-// let board = new five.Board({ io: new raspi() });
-// board.on('ready', () => {
-hubClient.getTwin((twinErr, twin) => {
-    //handle twinErr
+let board = new five.Board({ io: new raspi() }); //TODO
+// let board = new five.Board({});
+board.on('ready', () => {
+    hubClient.open(err => {
+        hubClient.getTwin((twinErr, twin) => {
+            if (twinErr) console.log(`Error getting the device twin (${twinErr})`);
 
-    // setup i/o
-    let led1 = new Led('GPIO26');
-    // let led2 = new five.Led('GPIOXX');
-    // let led3 = new five.Led('GPIOXX');
-    let button1 = new five.Button('GPIO20');
-    let button2 = new five.Button('GPIOXX');
-    // let button3 = new five.Button('GPIOXX');
+            // setup i/o
+            let lcd = new five.LCD({ controller: "JHD1313M1" });
+            let leftButton = new five.Button("GPIO24");
+            let rightButton = new five.Button("GPIO23");
 
-    //control an led
-    led1.on();
-    led1.off();
-    led1.blink(500); //500ms
-    led1.stop();
+            //logic
+            lcd.print("PEQUOD!");
+            leftButton.on('press', () => {
+                lcd.print('left');
+                lcd.bgColor("red");
+            })
+            rightButton.on('press', () => {
+                lcd.print('right');
+                lcd.bgColor("green");
+            })
 
-    //button event
-    button1.on('press', () => {
-        //do something
-        //change state
-    })
+            //update device twin property
+            twin.properties.reported.update(state, err => {
+                if (err) console.error('could not update twin ' + err);
+                else console.log('twin state reported');
+            })
 
-    //button event
-    button2.on('press', () => {
-        //device twin
-        twin.properties.reported.update(state, err => {
-            if (err) console.error('could not update twin');
-            else console.log('twin state reported');
+            // //send iot hub message
+            // let message = new device.Message(
+            //     JSON.stringify({ deviceId: 'dxpi12', tags: ['foo', 'baz', 'bar'] })
+            // );
+            // hubClient.sendEvent(message, (err, res) => {
+            //     if (err) console.log('hub error: ' + err);
+            //     else console.log(res);
+            // });
+
+            // //respond to C2D messages
+            // hubClient.on('message', msg => {
+            //     hubClient.complete(msg, () => {});
+            // });
+        
         })
-
     });
-
-    //use the camera
-    // let cam = new Camera();
-    // cam.baseFolder('.');
-    // cam.takePicture('picture.png', (file, error) => {})
-    //fs.unlinkSync('picture.png'); //delete a picture
-
-
-
-    //iot hub
-    hubClient.open(err => { });
-    let message = new device.Message(
-        JSON.stringify({ deviceId: 'device1', tags: ['foo', 'baz', 'bar'] })
-    );
-    hubClient.sendEvent(message, (err, res) => { });
-})
-    // });
+});
