@@ -1,5 +1,6 @@
 import * as five from 'johnny-five';
-import * as raspi from 'raspi-io';
+//import * as raspi from 'raspi-io';
+import { Led } from "./raspi-mock";
 import * as Camera from 'camerapi';
 import * as cognitiveServices from 'cognitive-services'
 import * as fs from 'fs';
@@ -11,16 +12,20 @@ let visionClient = new cognitiveServices();
 let connectionString = process.env.DEVICE_CONN_STRING;
 let hubClient = deviceAmqp.clientFromConnectionString(connectionString);
 
+let state = {};
+
 //establishing connection to gpio
-let board = new five.Board({ io: new raspi() });
-board.on('ready', () => {
+// let board = new five.Board({ io: new raspi() });
+// board.on('ready', () => {
+hubClient.getTwin((twinErr, twin) => {
+    //handle twinErr
 
     // setup i/o
-    let led1 = new five.Led('GPIO26');
+    let led1 = new Led('GPIO26');
     // let led2 = new five.Led('GPIOXX');
     // let led3 = new five.Led('GPIOXX');
     let button1 = new five.Button('GPIO20');
-    // let button2 = new five.Button('GPIOXX');
+    let button2 = new five.Button('GPIOXX');
     // let button3 = new five.Button('GPIOXX');
 
     //control an led
@@ -32,7 +37,18 @@ board.on('ready', () => {
     //button event
     button1.on('press', () => {
         //do something
+        //change state
     })
+
+    //button event
+    button2.on('press', () => {
+        //device twin
+        twin.properties.reported.update(state, err => {
+            if (err) console.error('could not update twin');
+            else console.log('twin state reported');
+        })
+
+    });
 
     //use the camera
     // let cam = new Camera();
@@ -40,18 +56,7 @@ board.on('ready', () => {
     // cam.takePicture('picture.png', (file, error) => {})
     //fs.unlinkSync('picture.png'); //delete a picture
 
-    //device twin
-    hubClient.getTwin((err, twin) => {
-        let state = { key: "value" };
-        twin.properties.reported.update(state, err => {
-            if (err) {
-                console.error('could not update twin');
-            } else {
-                console.log('twin state reported');
-                process.exit();
-            }
-        })
-    });
+
 
     //iot hub
     hubClient.open(err => { });
@@ -59,4 +64,5 @@ board.on('ready', () => {
         JSON.stringify({ deviceId: 'device1', tags: ['foo', 'baz', 'bar'] })
     );
     hubClient.sendEvent(message, (err, res) => { });
-});
+})
+    // });
