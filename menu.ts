@@ -1,4 +1,5 @@
 import * as _ from "lodash";
+import * as five from 'johnny-five';
 
 export class Menu {
     private items: MenuItem[] = [];
@@ -35,10 +36,19 @@ export class Menu {
         item.invoke();
     }
 
-    print() {
-        this.items.forEach(item => {
-            console.log(`${(item.selected ? "> " : "")}${item.displayName}`);
-        })
+    print(lcd: five.LCD) {
+        let selectedItem = _.find(this.items, i => i.selected);
+        let selectedItemIndex = this.items.indexOf(selectedItem);
+        let isLast = selectedItem == this.items[this.items.length - 1];
+
+        // line 1
+        lcd.cursor(0, 0);
+        lcd.print(`> ${selectedItem.displayName}`)
+        
+        // line 2
+        lcd.cursor(0,1);
+        if (!isLast)
+            lcd.print(this.items[selectedItemIndex + 1].displayName);
     }
 }
 
