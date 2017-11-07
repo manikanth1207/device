@@ -48,5 +48,5 @@ jspm_packages
 .yarn-integrity
 
 *.js
-*.map.js
+*.js.map
 
