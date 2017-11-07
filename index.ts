@@ -1,27 +1,23 @@
 import * as five from 'johnny-five'; //TODO
 import * as raspi from 'raspi-io'; //TODO
+import { HubClient } from "./hubClient";
 
-// import * as five from "./five-mock";
-import * as device from 'azure-iot-device';
-import * as deviceAmqp from 'azure-iot-device-amqp';
+let hubClient = new HubClient('HostName=cfhub.azure-devices.net;DeviceId=dxpi12;SharedAccessKey=+romy/Woi3j/wP4WZ3AVWKQUtf1CTQ7Ugp89JFdzTAI=');
 
-// let connectionString = process.env.DEVICE_CONN_STRING;
-let connectionString = 'HostName=cfhub.azure-devices.net;DeviceId=dxpi12;SharedAccessKey=+romy/Woi3j/wP4WZ3AVWKQUtf1CTQ7Ugp89JFdzTAI=';
-let hubClient = deviceAmqp.clientFromConnectionString(connectionString);
 let state = {
     recipes: {
-        "recipe1": {
+        "verona": {
+            version:"1.0.0",
             ingredients: {
                 "water": { amount: 17, temperature: 170 },
-                "chocolate": { amount: 30 },
                 "verona": { amount: 30 }
             }
         },
-        "recipe2": {
+        "hot chocolate": {
+            version:"1.0.0",
             ingredients: {
                 "water": { amount: 17, temperature: 170 },
-                "chocolate": { amount: 30 },
-                "verona": { amount: 30 }
+                "chocolate": { amount: 30 }
             }
         },
     },
@@ -32,7 +28,6 @@ let state = {
 let board = new five.Board({ io: new raspi() }); //TODO
 // let board = new five.Board({});
 board.on('ready', () => {
-    hubClient.open(err => {
         hubClient.getTwin((twinErr, twin) => {
 
             // state.hoppers.verona.currentWeight = 70;
@@ -43,6 +38,7 @@ board.on('ready', () => {
             let lcd = new five.LCD({ controller: "JHD1313M1" });
             let leftButton = new five.Button("GPIO24");
             let rightButton = new five.Button("GPIO23");
+
 
             //logic
             lcd.print("PEQUOD!");
@@ -66,6 +62,7 @@ board.on('ready', () => {
                 console.log("received change: " + JSON.stringify(desiredChange));
                 lcd.bgColor("blue");
             });
+
 
             // //send iot hub message
             // let message = new device.Message(
