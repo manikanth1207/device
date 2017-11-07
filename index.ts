@@ -1,15 +1,14 @@
-import * as five from 'johnny-five'; //TODO
-import * as raspi from 'raspi-io'; //TODO
+import * as five from 'johnny-five';
+import * as raspi from 'raspi-io';
 import { HubClient } from "./hubClient";
 let config = require("./config.json");
 let initialState = require("./initialState.json");
 
-let hubClient = new HubClient(config.ioTHubConnectionString);
+let hubClient = new HubClient(config.iotHubConnectionString);
 let state = initialState;
 
 //establishing connection to gpio
-let board = new five.Board({ io: new raspi() }); //TODO
-// let board = new five.Board({});
+let board = new five.Board({ io: new raspi() });
 board.on('ready', () => {
     // state.hoppers.verona.currentWeight = 70;
 
