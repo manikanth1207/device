@@ -1,0 +1,51 @@
+{
+    "location": "5 NW Kitchen",
+    "hoppers": {
+        "verona": {
+            "currentWeight": 75,
+            "alertWeight": 25
+        },
+        "pike place": {
+            "currentWeight": 50,
+            "alertWeight": 25
+        },
+        "milk": {
+            "currentWeight": 98,
+            "alertWeight": 25
+        },
+        "chocolate": {
+            "currentWeight": 15,
+            "alertWeight": 25
+        },
+        "water": {
+            "currentWeight": 100,
+            "alertWeight": 100
+        }
+    },
+    "recipes": {
+        "verona": {
+            "version": "1.0.0",
+            "ingredients": {
+                "water": {
+                    "amount": 17,
+                    "temperature": 170
+                },
+                "verona": {
+                    "amount": 30
+                }
+            }
+        },
+        "hot chocolate": {
+            "version": "1.0.0",
+            "ingredients": {
+                "water": {
+                    "amount": 17,
+                    "temperature": 170
+                },
+                "chocolate": {
+                    "amount": 30
+                }
+            }
+        }
+    }
+}

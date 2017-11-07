@@ -2,8 +2,8 @@ import * as device from 'azure-iot-device';
 import * as deviceAmqp from 'azure-iot-device-amqp';
 
 export class HubClient {
-    client = deviceAmqp.clientFromConnectionString(this.connectionString);
-    twin;
+    public client = deviceAmqp.clientFromConnectionString(this.connectionString);
+    public twin;
 
     constructor(private connectionString: string) {
         // this.client = deviceAmqp.clientFromConnectionString(this.connectionString);
@@ -25,4 +25,5 @@ export class HubClient {
             if (err) throw err;
         });
     }
+
 }

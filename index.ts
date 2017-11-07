@@ -1,96 +1,48 @@
 import * as five from 'johnny-five'; //TODO
 import * as raspi from 'raspi-io'; //TODO
 import { HubClient } from "./hubClient";
+let config = require("./config.json");
+let initialState = require("./initialState.json");
 
-let hubClient = new HubClient('HostName=cfhub.azure-devices.net;DeviceId=dxpi12;SharedAccessKey=+romy/Woi3j/wP4WZ3AVWKQUtf1CTQ7Ugp89JFdzTAI=');
-
-let state = {
-    recipes: {
-        "verona": {
-            version:"1.0.0",
-            ingredients: {
-                "water": { amount: 17, temperature: 170 },
-                "verona": { amount: 30 }
-            }
-        },
-        "hot chocolate": {
-            version:"1.0.0",
-            ingredients: {
-                "water": { amount: 17, temperature: 170 },
-                "chocolate": { amount: 30 }
-            }
-        },
-    },
-    location: "5 NW Kitchen"
-}
+let hubClient = new HubClient(config.ioTHubConnectionString);
+let state = initialState;
 
 //establishing connection to gpio
 let board = new five.Board({ io: new raspi() }); //TODO
 // let board = new five.Board({});
 board.on('ready', () => {
-        hubClient.getTwin((twinErr, twin) => {
+    // state.hoppers.verona.currentWeight = 70;
 
-            // state.hoppers.verona.currentWeight = 70;
+    // setup i/o
+    let lcd = new five.LCD({ controller: "JHD1313M1" });
+    let leftButton = new five.Button("GPIO24");
+    let rightButton = new five.Button("GPIO23");
 
-            if (twinErr) console.log(`Error getting the device twin (${twinErr})`);
+    //logic
+    lcd.print("PEQUOD!");
+    leftButton.on('press', () => {
+        lcd.print('left');
+        lcd.bgColor("red");
+        console.log(hubClient.twin);
+    })
+    rightButton.on('press', () => {
+        lcd.print('right');
+        lcd.bgColor("green");
+    })
 
-            // setup i/o
-            let lcd = new five.LCD({ controller: "JHD1313M1" });
-            let leftButton = new five.Button("GPIO24");
-            let rightButton = new five.Button("GPIO23");
-
-
-            //logic
-            lcd.print("PEQUOD!");
-            leftButton.on('press', () => {
-                lcd.print('left');
-                lcd.bgColor("red");
-                console.log(twin);
-            })
-            rightButton.on('press', () => {
-                lcd.print('right');
-                lcd.bgColor("green");
-            })
-
-            //update device twin property
-            twin.properties.reported.update(state, err => {
-                if (err) console.error('could not update twin ' + err);
-                else console.log('twin state reported');
-            })
-
-            twin.on('properties.desired', function (desiredChange) {
-                console.log("received change: " + JSON.stringify(desiredChange));
-                lcd.bgColor("blue");
-            });
-
-
-            // //send iot hub message
-            // let message = new device.Message(
-            //     JSON.stringify({ deviceId: 'dxpi12', tags: ['foo', 'baz', 'bar'] })
-            // );
-            // hubClient.sendEvent(message, (err, res) => {
-            //     if (err) console.log('hub error: ' + err);
-            //     else console.log(res);
-            // });
-
-            // //respond to C2D messages
-            // hubClient.on('message', msg => {
-            //     hubClient.complete(msg, () => {});
-            // });
-
-        })
+    //update device twin property
+    hubClient.twin.properties.reported.update(state, err => {
+        if (err) console.error('could not update twin ' + err);
+        else console.log('twin state reported');
+    })
+    hubClient.twin.on('properties.desired', function (desiredChange) {
+        console.log("received change: " + JSON.stringify(desiredChange));
+        lcd.bgColor("blue");
     });
-});
 
-function initialize() {
-    // set state to the contents of desired properties
+    // //respond to C2D messages
+    // hubClient.client.on('message', msg => {
+    //     hubClient.complete(msg, () => {});
+    // });
 
-    // hoppers: {
-    //     "verona": { currentWeight: 75, alertWeight: 25 },
-    //     "pike place": { currentWeight: 50, alertWeight: 25 },
-    //     "milk": { currentWeight: 98, alertWeight: 25 },
-    //     "chocolate": { currentWeight: 15, alertWeight: 25 },
-    //     "water": { currentWeight: 100, alertWeight: 100 }
-    // },
-
-}
+})
