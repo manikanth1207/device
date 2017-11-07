@@ -30,7 +30,8 @@ export class Menu {
         this.items.forEach((item, i) => item.selected = (i == (Math.max(0, selectedItemIndex - 1))));
     }
 
-    invokeItem(item: MenuItem = _.find(this.items, i => i.selected)) {
+    invokeSelectedItem() {
+        let item: MenuItem = _.find(this.items, i => i.selected);
         item.invoke();
     }
 
