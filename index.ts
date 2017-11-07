@@ -39,9 +39,9 @@ board.on('ready', () => {
         lcd.bgColor("blue");
     });
 
-    // //respond to C2D messages
-    // hubClient.client.on('message', msg => {
-    //     hubClient.complete(msg, () => {});
-    // });
+    //respond to C2D messages
+    hubClient.client.on('message', msg => {
+        hubClient.client.complete(msg, () => {});
+    });
 
 })
