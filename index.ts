@@ -66,34 +66,6 @@ board.on('ready', () => {
                 60000 // 1 min
             );
 
-            //send random brew messages
-            // sendSampleMessage();
-
-            function sendSampleMessage() {
-                let message = {
-                    recipeKey: ["hotchoc", "verona"][Math.round(Math.random())],
-                    recipeVersion: "1.0.0",
-                    ingredients: {
-                        "water": {
-                            "amount": 17 * (Math.random() * .1 + 0.95),
-                            "temperature": 170 * (Math.random() * .1 + 0.95)
-                        },
-                        "chocolate": {
-                            "amount": 30 * (Math.random() * .1 + 0.95)
-                        }
-                    }
-
-                };
-
-                let msg = new device.Message(JSON.stringify(message));
-                hubClient.sendEvent(msg, (err, res) => {
-                    if (err) throw err;
-                });
-
-                // hubClient.sendMessage();
-                setTimeout(sendSampleMessage, Math.random() * 120000 + 60000);
-            }
-
             //logic
             lcd.print("Welcome to Pequod");
             leftButton.on('press', () => {
