@@ -27,7 +27,9 @@ board.on('ready', () => {
             Object.keys(state.recipes)
                 .map(k => ({ ...{ key: k }, ...state.recipes[k] }))
                 .forEach(recipe => {
-                    menu.addItem(recipe.name, recipe.key, () => console.log('brew ' + recipe.key));
+                    menu.addItem(recipe.name, recipe.key, () => {
+                        //TODO
+                    });
                 })
 
             // setup i/o
@@ -36,8 +38,16 @@ board.on('ready', () => {
             let rightButton = new five.Button("GPIO23");
             lcd.bgColor("green");
 
+            //send heartbeat
+            setTimeout(
+                () => deviceTwin.properties.reported.update({ heartbeat: new Date() }, err => {
+                    if(err) console.log(`Hearbeat Error (${err})`)
+                }),
+                60000 // 1 min
+            );
+
             //send random brew messages
-            sendSampleMessage();
+            // sendSampleMessage();
 
             function sendSampleMessage() {
                 let message = {
@@ -65,7 +75,7 @@ board.on('ready', () => {
             }
 
             //logic
-            lcd.print("PEQUOD!");
+            lcd.print("Welcome to Pequod");
             leftButton.on('press', () => {
                 menu.incrementSelection();
                 menu.print(lcd);
