@@ -7,6 +7,16 @@
         {
             "type": "node",
             "request": "attach",
+            "name": "skookum-server (Attach)",
+            "address": "cfinspect.localtunnel.me",
+            "port": 80,
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "/home/pi/pequod/device",
+            "protocol": "inspector"
+        },
+        {
+            "type": "node",
+            "request": "attach",
             "name": "Attach",
             "port": 9229
         },
