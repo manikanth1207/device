@@ -21,6 +21,8 @@ export class Menu {
         // increment selected item
         if (!isLast)
             this.items.forEach((item, i) => item.selected = (i == (selectedItemIndex + 1)));
+        else
+            this.items.forEach((item, i) => item.selected = (i == 0));
     }
 
     decrementSelection() {
