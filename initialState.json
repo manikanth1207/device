@@ -24,6 +24,7 @@
     },
     "recipes": {
         "verona": {
+            "name":"Verona",
             "version": "1.0.0",
             "ingredients": {
                 "water": {
@@ -35,7 +36,8 @@
                 }
             }
         },
-        "hot chocolate": {
+        "hotchoc": {
+            "name":"Hot Chocolate",
             "version": "1.0.0",
             "ingredients": {
                 "water": {
