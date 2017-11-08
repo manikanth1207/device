@@ -39,6 +39,7 @@ export class Menu {
     }
 
     print(lcd: five.LCD) {
+        lcd.clear();
         let selectedItem = _.find(this.items, i => i.selected);
         let selectedItemIndex = this.items.indexOf(selectedItem);
         let isLast = selectedItem == this.items[this.items.length - 1];
@@ -48,7 +49,7 @@ export class Menu {
         lcd.print(`> ${selectedItem.displayName}`)
         
         // line 2
-        lcd.cursor(0,1);
+        lcd.cursor(1,0);
         if (!isLast)
             lcd.print(this.items[selectedItemIndex + 1].displayName);
     }
