@@ -77,11 +77,21 @@ board.on('ready', () => {
                 menu.invokeSelectedItem();
             })
 
-            // //update device twin property
-            // deviceTwin.properties.reported.update(state, err => {
-            //     if (err) console.error('could not update twin ' + err);
-            //     else console.log('twin state reported');
-            // })
+            hubClient.onDeviceMethod('notify', onNotify);
+
+            function onNotify(request, response) {
+                lcd.clear();
+                lcd.cursor(0,0);
+                lcd.print(request.payload.text);
+                lcd.bgColor("orange");
+
+                setTimeout(() => {
+                    menu.print(lcd);
+                    lcd.bgColor("green");
+                },3000)
+            
+                response.send(200, 'Notification received.', err => {});
+            }
 
             // deviceTwin.on('properties.desired', function (desiredChange) {
             //     console.log("received change: " + JSON.stringify(desiredChange));
