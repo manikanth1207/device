@@ -23,14 +23,6 @@ board.on('ready', () => {
 
             let menu = new Menu();
 
-            //add menu items
-            Object.keys(state.recipes)
-                .map(k => ({ ...{ key: k }, ...state.recipes[k] }))
-                .forEach(recipe => {
-                    menu.addItem(recipe.name, recipe.key, () => {
-                        //TODO
-                    });
-                })
 
             // setup i/o
             let lcd = new five.LCD({ controller: "JHD1313M1" });
@@ -38,10 +30,38 @@ board.on('ready', () => {
             let rightButton = new five.Button("GPIO23");
             lcd.bgColor("green");
 
+            //add menu items
+            Object.keys(state.recipes)
+                .map(k => ({ ...{ key: k }, ...state.recipes[k] }))
+                .forEach(recipe => {
+                    menu.addItem(recipe.name, recipe.key, () => {
+                        lcd.clear();
+                        lcd.cursor(0,0);
+                        lcd.print(`Brewing ${recipe.name}`);
+                        setTimeout(() => menu.print(lcd),3000);
+                        //send brew message
+                        let message = new device.Message(JSON.stringify({
+                            recipeKey: ["hotchoc", "verona"][Math.round(Math.random())],
+                            recipeVersion: "1.0.0",
+                            ingredients: {
+                                "water": {
+                                    "amount": 17 * (Math.random() * .1 + 0.95),
+                                    "temperature": 170 * (Math.random() * .1 + 0.95)
+                                },
+                                "chocolate": {
+                                    "amount": 30 * (Math.random() * .1 + 0.95)
+                                }
+                            }
+
+                        }));
+                        hubClient.sendEvent(message, (err, res) => { if (err) throw err; });
+                    });
+                })
+
             //send heartbeat
             setTimeout(
                 () => deviceTwin.properties.reported.update({ heartbeat: new Date() }, err => {
-                    if(err) console.log(`Hearbeat Error (${err})`)
+                    if (err) console.log(`Hearbeat Error (${err})`)
                 }),
                 60000 // 1 min
             );
