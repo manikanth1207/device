@@ -5,29 +5,33 @@ export function getRecipes() {
         key: "verona",
         name: "Verona",
         version: "1.0.0",
-        ingredients: {
-            water: {
+        ingredients: [
+            {
+                name: "water",
                 amount: 17,
                 temperature: 170
             },
-            verona: {
+            {
+                name: "verona",
                 amount: 30
             }
-        }
+        ]
     },
     {
         key: "hotchoc",
         name: "Hot Chocolate",
         version: "1.0.0",
-        ingredients: {
-            water: {
+        ingredients: [
+            {
+                name: "water",
                 amount: 17,
                 temperature: 170
             },
-            chocolate: {
+            {
+                name: "chocolate",
                 amount: 30
             }
-        }
+        ]
     }
     ]
 }

@@ -21,33 +21,5 @@
             "currentWeight": 100,
             "alertWeight": 100
         }
-    },
-    "recipes": {
-        "verona": {
-            "name":"Verona",
-            "version": "1.0.0",
-            "ingredients": {
-                "water": {
-                    "amount": 17,
-                    "temperature": 170
-                },
-                "verona": {
-                    "amount": 30
-                }
-            }
-        },
-        "hotchoc": {
-            "name":"Hot Chocolate",
-            "version": "1.0.0",
-            "ingredients": {
-                "water": {
-                    "amount": 17,
-                    "temperature": 170
-                },
-                "chocolate": {
-                    "amount": 30
-                }
-            }
-        }
     }
 }

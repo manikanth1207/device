@@ -11,7 +11,7 @@
             "address": "cfinspect.localtunnel.me",
             "port": 80,
             "localRoot": "${workspaceFolder}",
-            "remoteRoot": "/home/pi/pequod/device",
+            "remoteRoot": "/home/pi/pequod",
             "protocol": "inspector"
         },
         {

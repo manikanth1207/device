@@ -6,12 +6,13 @@ import { HubClient } from "./hubClient";
 import { Menu } from "./menu";
 import { getRecipes } from "./recipeService";
 let config = require("./config.json");
-// let initialState = require("./initialState.json");
+let initialState = require("./initialState.json");
 
 let hubClient = deviceAmqp.clientFromConnectionString(process.env.DEVICE_CONN_STRING);
 let deviceTwin;
 let brewMessage = "ENJOY!";
 let recipes = [];
+let state = initialState;
 
 //establishing connection to gpio
 let board = new five.Board({ io: new raspi() });
@@ -30,37 +31,39 @@ board.on('ready', () => {
             //add menu items
             updateRecipes();
             recipes.forEach(recipe => {
-                    menu.addItem(recipe.name, recipe.key, () => {
+                menu.addItem(recipe.name, recipe.key, () => {
+                    lcd.clear();
+                    lcd.cursor(0, 0);
+                    lcd.print(`Brewing ${recipe.name}`);
+
+                    //print brew message
+                    setTimeout(() => {
                         lcd.clear();
-                        lcd.cursor(0,1);
-                        lcd.print(`Brewing ${recipe.name}`);
+                        lcd.cursor(0, 0);
+                        lcd.print(brewMessage);
+                        setTimeout(() => menu.print(lcd), 3000);
+                    }, 3000)
 
-                        setTimeout(() => {
-                            lcd.clear();
-                            lcd.cursor(0,0);
-                            lcd.print(brewMessage);
-                            setTimeout(() => menu.print(lcd), 3000);
-                        }, 3000)
-        
-                        //send brew message
-                        //TODO: modify recipe ingredients (instead of hard coding)
-                        let message = new device.Message(JSON.stringify({
-                            recipeKey: recipe.key,
-                            recipeVersion: "1.0.0",
-                            ingredients: {
-                                "water": {
-                                    "amount": 17 * (Math.random() * .1 + 0.95),
-                                    "temperature": 170 * (Math.random() * .1 + 0.95)
-                                },
-                                "chocolate": {
-                                    "amount": 30 * (Math.random() * .1 + 0.95)
-                                }
-                            }
+                    //send brew message (calculating actuals)
+                    let actuals = recipe.ingredients;
+                    actuals.forEach(i => {
+                        Object.keys(i).forEach(k => {
+                            if (k != "name")
+                                i[k] = (i[k] * ((Math.random() * 0.1) + 0.95)).toFixed(2);
+                        });
+                    })
 
-                        }));
-                        hubClient.sendEvent(message, (err, res) => { if (err) throw err; });
-                    });
-                })
+                    //add message type and actuals
+                    let messageContent = {
+                        ...{ type: "brew" },
+                        ...recipe,
+                        ...{ ingredients: actuals }
+                    }
+                    
+                    let message = new device.Message(JSON.stringify(messageContent));
+                    hubClient.sendEvent(message, (err, res) => { if (err) throw err; });
+                });
+            })
 
             //send heartbeat
             setTimeout(
@@ -85,16 +88,16 @@ board.on('ready', () => {
 
             function onNotify(request, response) {
                 lcd.clear();
-                lcd.cursor(0,0);
+                lcd.cursor(0, 0);
                 lcd.print(request.payload.text);
                 lcd.bgColor(request.payload.color);
 
                 setTimeout(() => {
                     menu.print(lcd);
                     lcd.bgColor("green");
-                },3000)
-            
-                response.send(200, 'Notification received.', err => {});
+                }, 3000)
+
+                response.send(200, 'Notification received.', err => { });
             }
 
             function updateRecipes() {
@@ -107,7 +110,7 @@ board.on('ready', () => {
 
             //respond to C2D messages
             hubClient.on('message', msg => {
-                if(msg.type == 'recipe-update')
+                if (msg.type == 'recipe-update')
                     updateRecipes();
                 hubClient.complete(msg, () => { });
             });
