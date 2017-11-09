@@ -84,7 +84,7 @@ board.on('ready', () => {
                 lcd.clear();
                 lcd.cursor(0,0);
                 lcd.print(request.payload.text);
-                lcd.bgColor("orange");
+                lcd.bgColor(request.payload.color);
 
                 setTimeout(() => {
                     menu.print(lcd);
