@@ -75,7 +75,11 @@ board.on('ready', () => {
                             })
                         });
 
-                        console.log(state.hoppers);
+                        //alert on low hoppers
+                        state.hoppers.filter(h => h.currentWeight <= h.alertWeight).forEach(h => {
+                            let message = new device.Message(JSON.stringify({ type: "hopper-alert", hopper: h.name }));
+                            hubClient.sendEvent(message, (err, res) => { if (err) throw err; });
+                        });
 
                         //add message type and actuals
                         let messageContent = {
@@ -126,7 +130,7 @@ board.on('ready', () => {
                 recipes = getRecipes();
             }
 
-            deviceTwin.on('properties.desired', function (desiredChange) {
+            deviceTwin.on('properties.desired', function(desiredChange) {
                 brewMessage = desiredChange.brewMessage || brewMessage;
             });
 
