@@ -4,14 +4,14 @@ import * as device from 'azure-iot-device';
 import * as deviceAmqp from 'azure-iot-device-amqp';
 import { HubClient } from "./hubClient";
 import { Menu } from "./menu";
+import { getRecipes } from "./recipeService";
 let config = require("./config.json");
-let initialState = require("./initialState.json");
+// let initialState = require("./initialState.json");
 
-// let hubClient = new HubClient(config.iotHubConnectionString);
 let hubClient = deviceAmqp.clientFromConnectionString(process.env.DEVICE_CONN_STRING);
 let deviceTwin;
-let state = initialState;
 let brewMessage = "ENJOY!";
+let recipes = [];
 
 //establishing connection to gpio
 let board = new five.Board({ io: new raspi() });
@@ -19,11 +19,7 @@ board.on('ready', () => {
     hubClient.open(err => {
         hubClient.getTwin((err, twin) => {
             deviceTwin = twin;
-
-            // state.hoppers.verona.currentWeight = 70;
-
             let menu = new Menu();
-
 
             // setup i/o
             let lcd = new five.LCD({ controller: "JHD1313M1" });
@@ -32,14 +28,20 @@ board.on('ready', () => {
             lcd.bgColor("green");
 
             //add menu items
-            Object.keys(state.recipes)
-                .map(k => ({ ...{ key: k }, ...state.recipes[k] }))
-                .forEach(recipe => {
+            updateRecipes();
+            recipes.forEach(recipe => {
                     menu.addItem(recipe.name, recipe.key, () => {
                         lcd.clear();
-                        lcd.cursor(0,0);
+                        lcd.cursor(0,1);
                         lcd.print(`Brewing ${recipe.name}`);
-                        setTimeout(() => menu.print(lcd),3000);
+
+                        setTimeout(() => {
+                            lcd.clear();
+                            lcd.cursor(0,0);
+                            lcd.print(brewMessage);
+                            setTimeout(() => menu.print(lcd), 3000);
+                        }, 3000)
+        
                         //send brew message
                         //TODO: modify recipe ingredients (instead of hard coding)
                         let message = new device.Message(JSON.stringify({
@@ -88,10 +90,6 @@ board.on('ready', () => {
                 lcd.bgColor("orange");
 
                 setTimeout(() => {
-                    lcd.print(brewMessage);
-                },3000)
-
-                setTimeout(() => {
                     menu.print(lcd);
                     lcd.bgColor("green");
                 },3000)
@@ -99,14 +97,20 @@ board.on('ready', () => {
                 response.send(200, 'Notification received.', err => {});
             }
 
+            function updateRecipes() {
+                recipes = getRecipes();
+            }
+
             deviceTwin.on('properties.desired', function (desiredChange) {
-                brewMessage = desiredChange.brewMessage;
+                brewMessage = desiredChange.brewMessage || brewMessage;
             });
 
-            // //respond to C2D messages
-            // hubClient.client.on('message', msg => {
-            //     hubClient.client.complete(msg, () => { });
-            // });
+            //respond to C2D messages
+            hubClient.on('message', msg => {
+                if(msg.type == 'recipe-update')
+                    updateRecipes();
+                hubClient.complete(msg, () => { });
+            });
         });
 
     })
