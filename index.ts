@@ -11,6 +11,7 @@ let initialState = require("./initialState.json");
 let hubClient = deviceAmqp.clientFromConnectionString(process.env.DEVICE_CONN_STRING);
 let deviceTwin;
 let state = initialState;
+let brewMessage = "ENJOY!";
 
 //establishing connection to gpio
 let board = new five.Board({ io: new raspi() });
@@ -87,6 +88,10 @@ board.on('ready', () => {
                 lcd.bgColor(request.payload.color);
 
                 setTimeout(() => {
+                    lcd.print(brewMessage);
+                },3000)
+
+                setTimeout(() => {
                     menu.print(lcd);
                     lcd.bgColor("green");
                 },3000)
@@ -94,10 +99,9 @@ board.on('ready', () => {
                 response.send(200, 'Notification received.', err => {});
             }
 
-            // deviceTwin.on('properties.desired', function (desiredChange) {
-            //     console.log("received change: " + JSON.stringify(desiredChange));
-            //     lcd.bgColor("blue");
-            // });
+            deviceTwin.on('properties.desired', function (desiredChange) {
+                brewMessage = desiredChange.brewMessage;
+            });
 
             // //respond to C2D messages
             // hubClient.client.on('message', msg => {
