@@ -8,7 +8,7 @@ let config = require("./config.json");
 let initialState = require("./initialState.json");
 
 // let hubClient = new HubClient(config.iotHubConnectionString);
-let hubClient = deviceAmqp.clientFromConnectionString(config.iotHubConnectionString);
+let hubClient = deviceAmqp.clientFromConnectionString(process.env.DEVICE_CONN_STRING);
 let deviceTwin;
 let state = initialState;
 
