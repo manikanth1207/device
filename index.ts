@@ -40,8 +40,9 @@ board.on('ready', () => {
                         lcd.print(`Brewing ${recipe.name}`);
                         setTimeout(() => menu.print(lcd),3000);
                         //send brew message
+                        //TODO: modify recipe ingredients (instead of hard coding)
                         let message = new device.Message(JSON.stringify({
-                            recipeKey: ["hotchoc", "verona"][Math.round(Math.random())],
+                            recipeKey: recipe.key,
                             recipeVersion: "1.0.0",
                             ingredients: {
                                 "water": {
