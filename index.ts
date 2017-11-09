@@ -32,19 +32,7 @@ board.on('ready', () => {
             updateRecipes();
             recipes.forEach(recipe => {
                 menu.addItem(recipe.name, recipe.key, () => {
-                    lcd.clear();
-                    lcd.cursor(0, 0);
-                    lcd.print(`Brewing ${recipe.name}`);
-
-                    //print brew message
-                    setTimeout(() => {
-                        lcd.clear();
-                        lcd.cursor(0, 0);
-                        lcd.print(brewMessage);
-                        setTimeout(() => menu.print(lcd), 3000);
-                    }, 3000)
-
-                    //send brew message (calculating actuals)
+                    //calculating actuals
                     let actuals = recipe.ingredients;
                     actuals.forEach(i => {
                         Object.keys(i).forEach(k => {
@@ -53,15 +41,52 @@ board.on('ready', () => {
                         });
                     })
 
-                    //add message type and actuals
-                    let messageContent = {
-                        ...{ type: "brew" },
-                        ...recipe,
-                        ...{ ingredients: actuals }
+                    //check for sufficient ingredients
+                    let sufficient = actuals.reduce((result, actual) => {
+                        let hopperExists = state.hoppers.some(h => h.name == actual.name);
+                        let hasEnough = hopperExists && state.hoppers.filter(h => h.name == actual.name)[0].currentWeight >= actual.amount;
+                        return (result && hasEnough);
+                    }, true);
+
+                    if (!sufficient) {
+                        lcd.clear();
+                        lcd.cursor(0, 0);
+                        lcd.bgColor("red");
+                        lcd.print("Insufficient ingredients!");
+                        setTimeout(() => menu.print(lcd), 3000);
                     }
-                    
-                    let message = new device.Message(JSON.stringify(messageContent));
-                    hubClient.sendEvent(message, (err, res) => { if (err) throw err; });
+                    else {
+                        lcd.clear();
+                        lcd.cursor(0, 0);
+                        lcd.print(`Brewing ${recipe.name}`);
+
+                        //print brew message
+                        setTimeout(() => {
+                            lcd.clear();
+                            lcd.cursor(0, 0);
+                            lcd.print(brewMessage);
+                            setTimeout(() => menu.print(lcd), 3000);
+                        }, 3000)
+
+                        //reduce hopper values
+                        actuals.forEach(actual => {
+                            state.hoppers.filter(h => h.name == actual.name).forEach(h => {
+                                h.currentWeight -= actual.amount;
+                            })
+                        });
+
+                        console.log(state.hoppers);
+
+                        //add message type and actuals
+                        let messageContent = {
+                            ...{ type: "brew" },
+                            ...recipe,
+                            ...{ ingredients: actuals }
+                        }
+
+                        let message = new device.Message(JSON.stringify(messageContent));
+                        hubClient.sendEvent(message, (err, res) => { if (err) throw err; });
+                    }
                 });
             })
 
@@ -92,10 +117,7 @@ board.on('ready', () => {
                 lcd.print(request.payload.text);
                 lcd.bgColor(request.payload.color);
 
-                setTimeout(() => {
-                    menu.print(lcd);
-                    lcd.bgColor("green");
-                }, 3000)
+                setTimeout(() => menu.print(lcd), 3000)
 
                 response.send(200, 'Notification received.', err => { });
             }

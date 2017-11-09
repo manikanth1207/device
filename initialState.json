@@ -1,25 +1,30 @@
 {
     "location": "5 NW Kitchen",
-    "hoppers": {
-        "verona": {
+    "hoppers": [
+        {
+            "name": "verona",
             "currentWeight": 75,
             "alertWeight": 25
         },
-        "pike place": {
+        {
+            "name": "pikeplace",
             "currentWeight": 50,
             "alertWeight": 25
         },
-        "milk": {
+        {
+            "name": "milk",
             "currentWeight": 98,
             "alertWeight": 25
         },
-        "chocolate": {
-            "currentWeight": 15,
+        {
+            "name": "chocolate",
+            "currentWeight": 100,
             "alertWeight": 25
         },
-        "water": {
-            "currentWeight": 100,
+        {
+            "name": "water",
+            "currentWeight": 500,
             "alertWeight": 100
         }
-    }
+    ]
 }

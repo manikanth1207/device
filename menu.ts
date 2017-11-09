@@ -40,6 +40,7 @@ export class Menu {
 
     print(lcd: five.LCD) {
         lcd.clear();
+        lcd.bgColor("green");
         let selectedItem = _.find(this.items, i => i.selected);
         let selectedItemIndex = this.items.indexOf(selectedItem);
         let isLast = selectedItem == this.items[this.items.length - 1];
