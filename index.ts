@@ -138,7 +138,10 @@ board.on('ready', () => {
         
                         //add message type and actuals
                         let messageContent = {
-                            ...{ type: "brew" },
+                            ...{
+                                type: "brew",
+                                deviceId: deviceTwin.deviceId
+                            },
                             ...recipe,
                             ...{ ingredients: actuals }
                         }
